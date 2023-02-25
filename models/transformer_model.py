@@ -116,7 +116,7 @@ class TransformerModel(LightningModule):
         :param batch: tuple (X, y), where the shape of X is (batch_size, 23) and of y is (batch_size)
         :return: predictions: tensor of shape (batch_size)
         """
-        x = batch[0]
+        x = batch[0].transpose(0, 1)
         mask = (x != 3)[..., None]
 
         x = self.emb(x) * math.sqrt(self.d_model)

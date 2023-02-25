@@ -141,4 +141,4 @@ class TextDataModule(LightningDataModule):
         texts = [torch.tensor(sample['text']) for sample in batch]
         sequences = nn.utils.rnn.pad_sequence(texts, padding_value=3)
         labels = torch.tensor([sample['labels'] for sample in batch])
-        return sequences.long(), labels.long()
+        return sequences.long().transpose(0, 1), labels.long()
