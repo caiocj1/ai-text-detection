@@ -150,10 +150,10 @@ class TransformerModel(LightningModule):
         Selection of gradient descent algorithm and learning rate scheduler.
         :return: optimizer algorithm, learning rate scheduler
         """
-        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-4)
-        #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=72, eta_min=5e-5)
+        optimizer = torch.optim.AdamW(self.parameters(), lr=5e-4)
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=5e-5)
 
-        return [optimizer], []
+        return [optimizer], [lr_scheduler]
 
     def calc_metrics(self, prediction, target):
         """
