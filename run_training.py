@@ -25,6 +25,7 @@ if __name__ == '__main__':
     with open(config_path) as f:
         params = yaml.load(f, Loader=yaml.SafeLoader)
     training_params = params['TrainingParams']
+    model_params = params['ModelParams']
 
     # Initialize data module
     data_module = TextDataModule(
@@ -35,11 +36,11 @@ if __name__ == '__main__':
 
     # Initialize new model and setup data module
     model = TransformerModel(vocab_size=len(data_module.vocab),
-                             d_model=128,
-                             nhead=8,
-                             dim_feedforward=256,
-                             num_layers=1,
-                             dropout=0.2,
+                             d_model=model_params['d_model'],
+                             nhead=model_params['nhead'],
+                             dim_feedforward=model_params['dim_feedforward'],
+                             num_layers=model_params['num_layers'],
+                             dropout=model_params['dropout']
                              )
 
     if args.weights_path is not None:
@@ -53,14 +54,14 @@ if __name__ == '__main__':
     model_ckpt = ModelCheckpoint(dirpath=f'lightning_logs/{version}/checkpoints',
                                  save_top_k=2,
                                  monitor='accuracy_val',
-                                 mode='min',
+                                 mode='max',
                                  save_weights_only=True)
     lr_monitor = LearningRateMonitor()
 
     # Trainer
     trainer = Trainer(accelerator='auto',
                       devices=1 if torch.cuda.is_available() else None,
-                      max_epochs=100,
+                      max_epochs=200,
                       val_check_interval=450,
                       callbacks=[model_ckpt, lr_monitor],
                       logger=logger)

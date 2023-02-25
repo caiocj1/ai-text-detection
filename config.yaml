@@ -6,5 +6,10 @@ Word2VecParams:
 DatasetParams:
 
 ModelParams:
+  d_model: 128
+  nhead: 8
+  dim_feedforward: 256
+  num_layers: 1
+  dropout: 0.2
 
 TrainingParams:

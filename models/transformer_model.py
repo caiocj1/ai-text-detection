@@ -151,7 +151,7 @@ class TransformerModel(LightningModule):
         :return: optimizer algorithm, learning rate scheduler
         """
         optimizer = torch.optim.AdamW(self.parameters(), lr=5e-4)
-        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=5e-5)
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0)
 
         return [optimizer], [lr_scheduler]
 

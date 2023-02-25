@@ -105,7 +105,7 @@ class TextDataModule(LightningDataModule):
             self.data_val = TextDataset(self.X_val, self.y_val, self.tokenizer, self.vocab)
 
         elif stage == 'predict':
-            self.data_predict = TextDataset(X, y, self.tokenizer, self.vocab)
+            self.data_predict = TextDataset(self.X_test, self.y_test, self.tokenizer, self.vocab)
 
     def train_dataloader(self):
         """
