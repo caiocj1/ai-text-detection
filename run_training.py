@@ -38,7 +38,7 @@ if __name__ == '__main__':
                              d_model=128,
                              nhead=4,
                              dim_feedforward=128,
-                             num_layers=1,
+                             num_layers=2,
                              dropout=0.2,
                              )
 
