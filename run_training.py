@@ -35,7 +35,12 @@ if __name__ == '__main__':
 
     # Initialize new model and setup data module
     model = TransformerModel(vocab_size=len(data_module.vocab),
-                             d_model=128)
+                             d_model=128,
+                             nhead=4,
+                             dim_feedforward=128,
+                             num_layers=2,
+                             dropout=0.1,
+                             )
 
     if args.weights_path is not None:
         model = model.load_from_checkpoint(args.weights_path)
