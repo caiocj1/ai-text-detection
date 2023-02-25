@@ -3,7 +3,7 @@ import os
 import yaml
 
 from models.transformer_model import TransformerModel
-from dataset import TextDataModule
+from data_module import TextDataModule
 
 import torch.cuda
 
@@ -36,9 +36,9 @@ if __name__ == '__main__':
     # Initialize new model and setup data module
     model = TransformerModel(vocab_size=len(data_module.vocab),
                              d_model=128,
-                             nhead=4,
-                             dim_feedforward=128,
-                             num_layers=2,
+                             nhead=8,
+                             dim_feedforward=256,
+                             num_layers=1,
                              dropout=0.2,
                              )
 

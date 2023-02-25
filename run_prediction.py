@@ -7,7 +7,7 @@ import yaml
 from models.no_text_mlp import NoTextMLPModel
 from models.w2v_mlp import Word2VecMLPModel
 from models.transformer_model import TransformerModel
-from dataset import TextDataModule
+from data_module import TextDataModule
 
 import torch.cuda
 

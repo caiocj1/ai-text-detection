@@ -6,6 +6,7 @@ import yaml
 from yaml import SafeLoader
 from collections import OrderedDict
 import math
+import gensim
 
 from models.blocks import PositionalEncoding
 
@@ -22,7 +23,8 @@ class TransformerModel(LightningModule):
         super(TransformerModel, self).__init__()
         self.read_config()
 
-        self.emb = nn.Embedding(vocab_size, d_model)
+        if not self.use_w2v:
+            self.emb = nn.Embedding(vocab_size, d_model)
 
         self.pe = PositionalEncoding(d_model=d_model, dropout=dropout, vocab_size=vocab_size)
 
@@ -49,8 +51,9 @@ class TransformerModel(LightningModule):
         config_path = os.path.join(os.getcwd(), './config.yaml')
         with open(config_path) as f:
             params = yaml.load(f, Loader=SafeLoader)
-        model_params = params['ModelParams']
+        w2v_params = params['Word2VecParams']
 
+        self.use_w2v = w2v_params['use_w2v']
 
     def training_step(self, batch, batch_idx):
         """
@@ -117,12 +120,14 @@ class TransformerModel(LightningModule):
         :return: predictions: tensor of shape (batch_size)
         """
         x = batch[0].transpose(0, 1)
-        mask = (x != 3)[..., None]
+        mask = (x != 3).float()
 
-        x = self.emb(x) * math.sqrt(self.d_model)
+        if not self.use_w2v:
+            mask = mask[..., None]
+            x = self.emb(x) * math.sqrt(self.d_model)
         x = self.pe(x)
         x = self.transformer_encoder(x)
-        x = (x * mask.float()).sum(0) / mask.float().sum(0)
+        x = (x * mask).sum(0) / mask.sum(0)
         x = self.classifier(x)
 
         return x

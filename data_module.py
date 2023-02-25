@@ -18,6 +18,7 @@ from torchtext.data import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 import torch
 import torch.nn as nn
+import gensim
 
 class TextDataset(Dataset):
     def __init__(self, X, y, tokenizer, vocab):
@@ -28,7 +29,9 @@ class TextDataset(Dataset):
         self.vocab = vocab
 
     def __getitem__(self, item):
-        return {'text': self.vocab.lookup_indices(self.tokenizer(self.X[item]['text'])), 'labels': self.y[item]}
+        return {'text': self.tokenizer(self.X[item]['text']),
+                'text_ids': self.vocab.lookup_indices(self.tokenizer(self.X[item]['text'])),
+                'labels': self.y[item]}
 
     def __len__(self):
         return len(self.X)
@@ -68,6 +71,16 @@ class TextDataModule(LightningDataModule):
         self.vocab = build_vocab_from_iterator(yield_tokens(self.X_train), specials=["<bos>", "<eos>", "<unk>", "<pad>"])
         self.vocab.set_default_index(2)
 
+        if self.use_w2v:
+            self.word2vec = gensim.models.Word2Vec.load('models/word2vec.model')
+
+            train_texts = [self.tokenizer(sample['text']) for sample in self.X_train]
+            self.train_dictionary = gensim.corpora.Dictionary(train_texts)
+            self.train_corpus = [self.train_dictionary.doc2bow(text) for text in train_texts]
+
+            test_texts = [self.tokenizer(sample['text']) for sample in self.X_test]
+            self.test_corpus = [self.train_dictionary.doc2bow(text) for text in test_texts]
+
     def read_config(self):
         """
         Read configuration file with hyperparameters.
@@ -77,6 +90,9 @@ class TextDataModule(LightningDataModule):
         with open(config_path) as f:
             params = yaml.load(f, Loader=SafeLoader)
         dataset_params = params['DatasetParams']
+        w2v_params = params['Word2VecParams']
+
+        self.use_w2v = w2v_params['use_w2v']
 
     def setup(self, stage: str = None):
         """
@@ -138,7 +154,17 @@ class TextDataModule(LightningDataModule):
 
     def collate_fn(self, batch):
         batch_size = len(batch)
-        texts = [torch.tensor(sample['text']) for sample in batch]
+
+        if self.use_w2v:
+            texts = [sample['text'] for sample in batch]
+            texts = [[word for word in text if word in self.word2vec.wv] for text in texts]
+            texts = [torch.tensor(self.word2vec.wv[text]) for text in texts]
+        else:
+            texts_ids = [torch.tensor(sample['text_ids']) for sample in batch]
+            texts = texts_ids
+
         sequences = nn.utils.rnn.pad_sequence(texts, padding_value=3)
+
         labels = torch.tensor([sample['labels'] for sample in batch])
+
         return sequences.long().transpose(0, 1), labels.long()

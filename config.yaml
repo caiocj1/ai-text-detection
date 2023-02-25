@@ -1,3 +1,8 @@
+Word2VecParams:
+  vector_size: 128
+  num_epochs: 4
+  use_w2v: True
+
 DatasetParams:
 
 ModelParams:
